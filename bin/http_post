@@ -6,6 +6,8 @@ require 'uri'
 require 'openssl'
 require 'securerandom'
 require 'optparse'
+require 'mail'
+require 'email_reply_parser'
 
 options = {
   secret: nil
@@ -29,7 +31,11 @@ timestamp = Time.now.to_i
 token = SecureRandom.hash
 signature = OpenSSL::HMAC.hexdigest(OpenSSL::Digest::Digest.new('SHA256'), options[:secret], [timestamp, token].join)
 
-data = { :message => STDIN.read, :timestamp => timestamp, :token => token, :signature => signature }
+email = STDIN.read
+mail = Mail.new(email)
+parsed_body = EmailReplyParser.parse_reply(mail.body.decoded)
+
+data = { :body => parsed_body, :to => mail.to, :from => mail.from, :subject => mail.subject, :timestamp => timestamp, :token => token, :signature => signature }
 headers = {}
 
 req = Net::HTTP::Post.new(http_endpoint.path, headers)

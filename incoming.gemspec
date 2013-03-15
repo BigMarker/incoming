@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'mail',          '~> 2.4'
   s.add_dependency 'postmark-mitt', '~> 0.0.11'
+  s.add_dependency 'email_reply_parser', '= 0.5.3'
 
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec'

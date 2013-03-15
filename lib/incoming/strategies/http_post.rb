@@ -13,7 +13,10 @@ module Incoming
         @signature = params['signature']
         @token = params['token']
         @timestamp = params['timestamp']
-        @message = Mail.new(params['message'])
+        @message = Mail.new(params['body'])
+        @message.to = params['to']
+        @message.from = params['from']
+        @message.subject = params['subject']
       end
 
       def authenticate
