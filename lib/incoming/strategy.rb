@@ -72,9 +72,7 @@ module Incoming
     # Public: Translates arguments into a Mail::Message object
     def initialize(*args) ; end
 
-    protected
-
-    # Protected: Evaluates message and performs appropriate action.
+    # Public: Evaluates message and performs appropriate action.
     # Override in subclass
     #
     # mail - A Mail::Message object
@@ -84,7 +82,7 @@ module Incoming
       raise NotImplementedError.new('You must implement #receive')
     end
 
-    # Protected: Authenticates request before performing #receive
+    # Public: Authenticates request before performing #receive
     #
     # Examples:
     #
@@ -102,5 +100,27 @@ module Incoming
     def authenticate
       true
     end
+
+    protected
+
+      # Protected: Normalize file from params
+      #
+      # uploaded_file_or_hash - ActionController::UploadedFile,
+      #                         ActionDispatch::Http::UploadedFile, or Hash
+      #
+      # Returns Hash for Mail::Message#add_file
+      def attachment_from_params(uploaded_file_or_hash)
+        filename, content = if Hash === uploaded_file_or_hash
+                              [uploaded_file_or_hash['filename'], uploaded_file_or_hash['tempfile'].read]
+                            else
+                              [uploaded_file_or_hash.original_filename, uploaded_file_or_hash.read]
+                            end
+
+        {
+          :filename => filename,
+          :content => content
+        }
+      end
+
   end
 end

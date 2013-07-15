@@ -41,11 +41,17 @@ module Incoming
         html_content = params[ self.class.default_options[:stripped] ? 'stripped-html' : 'body-html' ]
         text_content = params[ self.class.default_options[:stripped] ? 'stripped-text' : 'body-plain' ]
 
+        if self.class.default_options[:stripped] && text_content.to_s == ''
+          html_content = params['body-html']
+          text_content = params['body-plain']
+        end
+
+        attachments = 1.upto(params['attachment-count'].to_i).map do |num|
+          attachment_from_params(params["attachment-#{num}"])
+        end
+
         @message = Mail.new do
           headers Hash[JSON.parse(params['message-headers'])]
-          from params['from']
-          to params['recipient']
-          subject params['subject']
 
           body text_content
 
@@ -54,9 +60,8 @@ module Incoming
             body html_content
           end if html_content
 
-          1.upto(params['attachment-count'].to_i).each do |num|
-            attachment = params["attachment-#{num}"]
-            add_file(:filename => attachment.original_filename, :content => attachment.read)
+          attachments.each do |attachment|
+            add_file(attachment)
           end
         end
       end
